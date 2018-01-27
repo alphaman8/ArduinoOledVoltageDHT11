@@ -30,7 +30,7 @@ Adafruit_SSD1306 display(OLED_RESET);
 #define YPOS 1
 #define DELTAY 2
 
-#define DHTPIN 2     
+#define DHTPIN 10
 #define DHTTYPE DHT11 
 
 #define LOGO16_GLCD_HEIGHT 16 
@@ -95,11 +95,11 @@ void loop() {
   if (volt > maxVoltage) {
     maxVoltage = volt;
   }
-  
+
+  display.clearDisplay();  
+  printTempHumid();  
   drawVoltage();  
-  drawTime();  
-  display.clearDisplay();
-  printTempHumid();
+  drawTime();
   delay(1000);
 }
 
@@ -122,13 +122,13 @@ void calculateTime()
 void drawVoltage(void) {
   display.setTextSize(1);
   display.setTextColor(WHITE);
-  display.setCursor(0,0);
+  display.setCursor(0,20);
   display.print(volt);
   display.print("v");
-  display.setCursor(40,0);
+  display.setCursor(40,20);
   display.print(maxVoltage);
   display.print("v"); 
-  display.setCursor(80,0);
+  display.setCursor(80,20);
   float percent = 
     ((volt-minVoltage)*100)/(maxVoltage-minVoltage);
   display.print(percent);
@@ -138,7 +138,7 @@ void drawVoltage(void) {
 }
 
 void drawTime(void) {
-  display.setTextSize(.2);
+  display.setTextSize(1);
   display.setTextColor(WHITE);
   display.setCursor(0,10);
   display.print(hour);
@@ -174,7 +174,7 @@ long readVcc() {
   
     result = 1125300L / result; // Calculate Vcc (in mV); 1125300 = 1.1*1023*1000
     return result; // Vcc in millivolts
-  }
+    }
 
   void printTempHumid()
   {
@@ -193,23 +193,17 @@ long readVcc() {
     }
   
     // Compute heat index in Fahrenheit (the default)
-    float hif = dht.computeHeatIndex(f, h);
+//    float hif = dht.computeHeatIndex(f, h);
     // Compute heat index in Celsius (isFahreheit = false)
-    float hic = dht.computeHeatIndex(t, h, false);
-  
-    Serial.print("Humidity: ");
-    Serial.print(h);
-    Serial.print(" %\t");
-    Serial.print("Temperature: ");
-    Serial.print(t);
-    Serial.print(" *C ");
-    Serial.print(f);
-    Serial.print(" *F\t");
-    Serial.print("Heat index: ");
-    Serial.print(hic);
-    Serial.print(" *C ");
-    Serial.print(hif);
-    Serial.println(" *F");    
-  }
-}
+//    float hic = dht.computeHeatIndex(t, h, false);
 
+    display.setTextSize(1);
+    display.setTextColor(WHITE);
+    display.setCursor(0,0);
+    display.print(h);
+    display.print("% ");  
+    display.print(t);
+    display.print("C");  
+    display.display();
+    delay(1);    
+  }
