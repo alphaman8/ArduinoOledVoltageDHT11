@@ -61,6 +61,7 @@ int hour = 0;
 float maxVoltage = 0;
 float minVoltage = 3.3;
 float volt = 0;
+int margin_info2 = 45;
 
 void setup()   {                
   Serial.begin(9600);
@@ -122,32 +123,65 @@ void calculateTime()
 void drawVoltage(void) {
   display.setTextSize(1);
   display.setTextColor(WHITE);
-  display.setCursor(0,20);
+  display.setCursor(margin_info2,10);
   display.print(volt);
   display.print("v");
-  display.setCursor(40,20);
+  display.setCursor(margin_info2+35,10);
   display.print(maxVoltage);
   display.print("v"); 
-  display.setCursor(80,20);
+  display.setCursor(margin_info2,20);
   float percent = 
     ((volt-minVoltage)*100)/(maxVoltage-minVoltage);
   display.print(percent);
   display.print("%"); 
   display.display();
-  delay(1);
 }
+
+void printTempHumid()
+{
+    // Reading temperature or humidity takes about 250 milliseconds!
+    // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
+    float h = dht.readHumidity();
+    // Read temperature as Celsius (the default)
+    float t = dht.readTemperature();
+    // Read temperature as Fahrenheit (isFahrenheit = true)
+    float f = dht.readTemperature(true);
+  
+    // Check if any reads failed and exit early (to try again).
+    if (isnan(h) || isnan(t) || isnan(f)) {
+      Serial.println("Failed to read from DHT sensor!");
+      return;
+    }
+  
+    // Compute heat index in Fahrenheit (the default)
+//    float hif = dht.computeHeatIndex(f, h);
+    // Compute heat index in Celsius (isFahreheit = false)
+//    float hic = dht.computeHeatIndex(t, h, false);
+
+    display.setTextColor(WHITE);
+    display.setCursor(0,0);
+    display.setTextSize(2);
+    display.print((int)t);
+    display.setTextSize(1);
+    display.print("C ");  
+    display.setCursor(0,15);    
+    display.setTextSize(2);
+    display.print((int)h);
+    display.setTextSize(1);    
+    display.print("%");  
+    display.display();
+  }
 
 void drawTime(void) {
   display.setTextSize(1);
   display.setTextColor(WHITE);
-  display.setCursor(0,10);
+  display.setCursor(margin_info2,0);
   display.print(hour);
   display.print(":");  
   display.print(min);
   display.print(":");
   display.print(sec);
   display.display();
-  delay(1);
 }
 
 long readVcc() {
@@ -174,36 +208,4 @@ long readVcc() {
   
     result = 1125300L / result; // Calculate Vcc (in mV); 1125300 = 1.1*1023*1000
     return result; // Vcc in millivolts
-    }
-
-  void printTempHumid()
-  {
-    // Reading temperature or humidity takes about 250 milliseconds!
-    // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
-    float h = dht.readHumidity();
-    // Read temperature as Celsius (the default)
-    float t = dht.readTemperature();
-    // Read temperature as Fahrenheit (isFahrenheit = true)
-    float f = dht.readTemperature(true);
-  
-    // Check if any reads failed and exit early (to try again).
-    if (isnan(h) || isnan(t) || isnan(f)) {
-      Serial.println("Failed to read from DHT sensor!");
-      return;
-    }
-  
-    // Compute heat index in Fahrenheit (the default)
-//    float hif = dht.computeHeatIndex(f, h);
-    // Compute heat index in Celsius (isFahreheit = false)
-//    float hic = dht.computeHeatIndex(t, h, false);
-
-    display.setTextSize(1);
-    display.setTextColor(WHITE);
-    display.setCursor(0,0);
-    display.print(h);
-    display.print("% ");  
-    display.print(t);
-    display.print("C");  
-    display.display();
-    delay(1);    
-  }
+}
