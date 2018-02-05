@@ -24,9 +24,6 @@ All text above, and the splash screen must be included in any redistribution
 #define OLED_RESET 4
 Adafruit_SSD1306 display(OLED_RESET);
 
-#define DHTPIN 10
-#define DHTTYPE DHT11 
-
 #define humidity_width 20
 #define humidity_height 22
 static unsigned char humidity_bits[] = {
@@ -81,7 +78,7 @@ void loop() {
   if (currentMillis - previousMillis >= interval) {
     // save the last time you blinked the LED
     previousMillis = currentMillis;
-    calculateTime();
+//    calculateTime();
 //    volt = readVcc();
 //    volt = volt/1000;
 //  
@@ -92,7 +89,7 @@ void loop() {
     display.clearDisplay();  
     printTempHumid();  
 //    drawVoltage();  
-    drawTime();      
+//    drawTime();      
   }    
 //  delay(1000);
 }
@@ -137,6 +134,8 @@ void printTempHumid()
     float h = bme280.getHumidity();
     // Read temperature as Celsius (the default)
     float t = bme280.getTemperature();
+    float pressure = bme280.getPressure();
+    float altitude = bme280.calcAltitude(pressure);
   
     // Check if any reads failed and exit early (to try again).
     if (isnan(h) || isnan(t)) {
@@ -150,16 +149,21 @@ void printTempHumid()
 //    float hic = dht.computeHeatIndex(t, h, false);
 
     display.setTextColor(WHITE);
-    display.setCursor(0,0);
+    display.setCursor(5,0);
     display.setTextSize(2);
     display.print((int)t);
     display.setTextSize(1);
     display.print("C ");  
-    display.setCursor(0,15);    
+    display.setCursor(5,15);    
     display.setTextSize(2);
     display.print((int)h);
     display.setTextSize(1);    
     display.print("%");  
+    display.setCursor(60,0);
+    display.setTextSize(2);
+    display.print((int)altitude);
+    display.setTextSize(1);
+    display.print("m ");      
     display.display();
   }
 
