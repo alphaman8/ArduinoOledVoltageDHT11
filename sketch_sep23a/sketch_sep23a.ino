@@ -45,6 +45,10 @@ float volt = 0;
 int margin_info2 = 45;
 unsigned long previousMillis = 0;        // will store last time LED was updated
 const long interval = 1000;   
+int index = 0;
+int graph_col = 55; //x do grafico, representa a coluna
+int graphRows[100],graphCols[100];
+int graphLen = 40;
 
 void setup()   {                
   Serial.begin(9600);
@@ -91,6 +95,7 @@ void loop() {
 //    drawVoltage();  
 //    drawTime();      
   }    
+
 //  delay(1000);
 }
 
@@ -108,23 +113,6 @@ void calculateTime()
     min = 0;
     hour++;
   }
-}
-
-void drawVoltage(void) {
-  display.setTextSize(1);
-  display.setTextColor(WHITE);
-  display.setCursor(margin_info2,10);
-  display.print(volt);
-  display.print("v");
-  display.setCursor(margin_info2+35,10);
-  display.print(maxVoltage);
-  display.print("v"); 
-  display.setCursor(margin_info2,20);
-  float percent = 
-    ((volt-minVoltage)*100)/(maxVoltage-minVoltage);
-  display.print(percent);
-  display.print("%"); 
-  display.display();
 }
 
 void printTempHumid()
@@ -164,8 +152,33 @@ void printTempHumid()
     display.print((int)altitude);
     display.setTextSize(1);
     display.print("m ");      
+
+    float height = altitude/10;
+
+    //draw graph
+    graphRows[index]=(int)height;
+    graphCols[index]=graph_col;
+    for (int i=0; i <= graphLen; i++){
+      display.drawPixel(graphCols[i],graphRows[i], WHITE);
+      Serial.print(graphRows[i]);
+      Serial.print(" ");
+      Serial.print(graphCols[i]);
+      Serial.print(" ");
+    }
+    
+    index++;
+    if (index>graphLen)
+    {
+      index=0;
+    }    
+    graph_col++;
+    if (graph_col>55+graphLen)
+    {
+      graph_col=55;
+    }
     display.display();
-  }
+    Serial.println();
+}
 
 void drawTime(void) {
   display.setTextSize(1);
@@ -178,29 +191,3 @@ void drawTime(void) {
   display.print(sec);
   display.display();
 }
-
-//long readVcc() {
-//    // Read 1.1V reference against AVcc
-//    // set the reference to Vcc and the measurement to the internal 1.1V reference
-//    #if defined(__AVR_ATmega32U4__) || defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-//      ADMUX = _BV(REFS0) | _BV(MUX4) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1);
-//    #elif defined (__AVR_ATtiny24__) || defined(__AVR_ATtiny44__) || defined(__AVR_ATtiny84__)
-//      ADMUX = _BV(MUX5) | _BV(MUX0);
-//    #elif defined (__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
-//      ADMUX = _BV(MUX3) | _BV(MUX2);
-//    #else
-//      ADMUX = _BV(REFS0) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1);
-//    #endif  
-//  
-//    delay(2); // Wait for Vref to settle
-//    ADCSRA |= _BV(ADSC); // Start conversion
-//    while (bit_is_set(ADCSRA,ADSC)); // measuring
-//  
-//    uint8_t low  = ADCL; // must read ADCL first - it then locks ADCH  
-//    uint8_t high = ADCH; // unlocks both
-//  
-//    long result = (high<<8) | low;
-//  
-//    result = 1125300L / result; // Calculate Vcc (in mV); 1125300 = 1.1*1023*1000
-//    return result; // Vcc in millivolts
-//}
