@@ -19,13 +19,12 @@ All text above, and the splash screen must be included in any redistribution
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
-#include <Seeed_BME280.h>
+
 
 #define OLED_RESET 4
 Adafruit_SSD1306 display(OLED_RESET);
 
-#define DHTPIN 10
-#define DHTTYPE DHT11 
+Adafruit_BME280 bme; // I2C
 
 #define humidity_width 20
 #define humidity_height 22
@@ -36,8 +35,6 @@ static unsigned char humidity_bits[] = {
    0xf0, 0xf3, 0x01, 0xc0, 0xf1, 0x01, 0x00, 0xf8, 0x03, 0x00, 0xf8, 0x03,
    0x00, 0xfc, 0x07, 0x00, 0xfc, 0x06, 0x00, 0xf8, 0x06, 0x00, 0x78, 0x03,
    0x00, 0xf0, 0x01, 0x00, 0x00, 0x00 };
-
-BME280 bme280;   
 
 int sec = 0;
 int min = 0;
@@ -50,12 +47,11 @@ unsigned long previousMillis = 0;        // will store last time LED was updated
 const long interval = 1000;   
 
 void setup()   {                
+  
   Serial.begin(9600);
-
-  if(!bme280.init()){ 
-    Serial.println("Device error!");
-  }
-
+  
+  Wire.begin(8, 9);
+  
   // by default, we'll generate the high voltage from the 3.3v line internally! (neat!)
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3D (for the 128x64)
   // init done
@@ -68,6 +64,11 @@ void setup()   {
 
   // Clear the buffer.
   display.clearDisplay();
+
+  if (!bme.begin()) {
+    Serial.println("Could not find a valid BME280 sensor, check wiring!");
+    while (1);
+  }  
 
   // draw a bitmap icon and 'animate' movement
 //  testdrawbitmap(humidity_bits, humidity_height, humidity_height);  
@@ -93,6 +94,7 @@ void loop() {
     printTempHumid();  
 //    drawVoltage();  
     drawTime();      
+    Serial.println(".");
   }    
 //  delay(1000);
 }
@@ -134,9 +136,9 @@ void printTempHumid()
 {
     // Reading temperature or humidity takes about 250 milliseconds!
     // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
-    float h = bme280.getHumidity();
+    float h = bme.getHumidity();
     // Read temperature as Celsius (the default)
-    float t = bme280.getTemperature();
+    float t = bme.getTemperature();
   
     // Check if any reads failed and exit early (to try again).
     if (isnan(h) || isnan(t)) {
